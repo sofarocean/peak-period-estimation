@@ -48,13 +48,13 @@ def get_spectrum(kind) -> FrequencySpectrum:
 
 
     if kind == 'native':
-        kwargs = {}
+        kwargs = {'segment_length_seconds':3600}
         name = f'./data/spectrum_native.nc'
     elif kind == 'zp':
-        kwargs = {'fft_length':2048*8}
+        kwargs = {'fft_length':2048*8,'segment_length_seconds':3600}
         name = f'./data/spectrum_zeropadded.nc'
     elif kind == 'smoothed':
-        kwargs = {'window':get_window('hann', 2048),'spectral_window':numpy.ones(11)}
+        kwargs = {'window':get_window('hann', 2048),'spectral_window':numpy.ones(9),'segment_length_seconds':3600}
         name = f'./data/spectrum_smoothed.nc'
     else:
         raise Exception(f'unknown kind {kind}')

@@ -1,78 +1,65 @@
 import sunflower13_data
 import numpy
+from roguewave import get_spectrum
+from roguewave.spotterapi import search_rectangle
+from datetime import datetime
 import matplotlib.pyplot as plt
-from datetime import datetime, timezone
-PATH = "/Users/pietersmit/Downloads/Sunflower13/log"
+import numpy as np
+from scipy.stats import linregress
+from roguewave import to_datetime64, FrequencySpectrum
 
-z_stages = [
-    ("spike", None),
-    ("integrate", None),
-    ("cumulative", None),
-    ("sos", None),
-]
-
-use_u=True
-
-spectra = sunflower13_data.get_spectrum('native')
-spectra2 = sunflower13_data.get_spectrum('smoothed')
-spectra3 = sunflower13_data.get_spectrum('zp')
-
-xstart = datetime(2022,9,24)
-xend = datetime(2022,10,1)
-
-# xstart = datetime(2022,10,10)
-# xend = datetime(2022,10,15)
-
-s = spectra3.sel(time=[xstart,xend])
+spotter = ['SPOT-010460','SPOT-1000','SPOT-0807']
 
 
-intp  = sunflower13_data.get_interpolated_spectrum()
-intp_spline  = sunflower13_data.get_natural_interpolated_spectrum()
-
-plt.figure(figsize=[7,5],dpi=300)
-n = 600
-
-plt.plot( spectra3.frequency.values,spectra3.variance_density.values[n,:],'b'  )
-plt.plot( spectra.frequency.values,spectra.variance_density.values[n,:],'k'  )
-plt.plot( intp.frequency.values,intp.variance_density.values[n,:],'orange'  )
+start = datetime(2023,4,1)
+end = datetime(2023,4,23)
+spotter = get_spectrum(spotter,start,end)[spotter[0]] # type: FrequencySpectrum
 
 
-f = 0.035*1.1**numpy.arange(0,36)
-plt.plot(f,f*0,'kx')
-plt.xlim( (0.,0.2))
+
+#tp_monotone  = sunflower13_data.peak_period_monotone()
+
+tp_monotone = spotter.peak_period(use_spline=True,monotone_interpolation=False)
+dir = (270 - spotter.mean_direction().values) %360
+# plt.figure(figsize=(7,6))
+# plt.plot(tp_monotone.time,tp_monotone)
+#
+# plt.xticks(rotation=45)
+# plt.show()
+# exit(-1)
+time = tp_monotone.time
+fp_monotone = 1/tp_monotone
+
+def regress(x,y):
+    res = linregress( x, y )
+    return res.slope, res.intercept
+
+def distance( time_second,fpeak ):
+    res = linregress( time_second, fpeak )
+    dfdt = res.slope
+    g = 9.81
+    R = g / 4 / np.pi / dfdt / 1000
+    return R
+
+start = datetime(2023,4,10).timestamp()
+end = datetime(2023,4,12).timestamp()
 
 
-plt.figure(figsize=[7,6],dpi=300)
-plt.plot( spectra3.time,spectra.peak_period(),'grey' )
-plt.plot( spectra3.time,spectra3.peak_period(),'b' )
-plt.plot( spectra3.time,intp.peak_period(),'orange' )
 
-plt.xticks(rotation=45)
+fp = fp_monotone.values
+time = time.values.astype('float64')/1e9
+msk = (time > start) & (time < end)
+fp = fp[ msk ]
+dir = dir[msk]
+time = time[msk]
+t = to_datetime64(time)
 
-plt.xlim((xstart,xend))
-plt.grid('on')
+a,b = regress(time,fp)
+plt.subplot(2,1,1)
+plt.plot(t,fp)
+plt.plot(t, a*time+b,'r--')
 
-plt.figure(figsize=[7,6],dpi=300)
-plt.plot( spectra3.time,spectra3.hm0(),'b' )
-plt.plot( spectra3.time,intp.hm0(),'orange' )
-plt.plot( spectra3.time,spectra.hm0(),'grey' )
-
-plt.xticks(rotation=45)
-plt.xlim((xstart,xend))
-plt.grid('on')
-
-plt.figure(figsize=[7,6],dpi=300)
-plt.plot( [0,20],[0,20],'k--')
-plt.plot( spectra3.peak_period(),spectra.peak_period(),'kx' )
-plt.plot( spectra3.peak_period(),intp.peak_period(),'bx' )
-plt.grid('on')
-
-plt.figure(figsize=[7,6],dpi=300)
-plt.plot( spectra3.time,spectra.peak_direction(),'grey' )
-plt.plot( spectra3.time,spectra3.peak_direction(),'b' )
-plt.plot( spectra3.time,intp.peak_direction(),'orange' )
-plt.xticks(rotation=45)
-plt.xlim((xstart,xend))
-plt.grid('on')
-
+plt.subplot(2,1,2)
+plt.plot(t,dir)
+print(distance(time,fp))
 plt.show()
