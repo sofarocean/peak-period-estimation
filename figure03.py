@@ -1,4 +1,3 @@
-from roguewave import FrequencySpectrum
 from roguewave.wavespectra.parametric import create_parametric_frequency_spectrum
 import matplotlib.pyplot as plt
 import numpy as np
@@ -50,15 +49,15 @@ relative_frequency = peak_frequency #(peak_frequency - jj * frequency_step) / fr
 frequency_width = [2*frequency_step,frequency_step,frequency_step/2,frequency_step/10]
 
 # Running is somewhat slow - so we save locally the results after the first time.
-if os.path.exists('data.zip'):
-    data = load('data.zip')
+if os.path.exists('data/data.zip'):
+    data = load('data/data.zip')
 else:
     # Lets calculate
     data = {}
     data['gaussian'] = get_periods(peak_frequency, frequency_width, kind='gaussian')
     data['jonswap'] = get_periods(peak_frequency, [0.0], kind='jonswap')
     data['pm'] = get_periods(peak_frequency, [0.0], kind='pm')
-    save(data,'data.zip')
+    save(data, 'data/data.zip')
 
 
 
