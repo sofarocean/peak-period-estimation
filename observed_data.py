@@ -51,7 +51,7 @@ def get_spectrum(kind) -> FrequencySpectrum:
 
     if kind == 'reference':
         kwargs = {'segment_length_seconds': 3600, 'use_u':True,'use_v':True}
-        name = f'./data/spectrum_native.nc'
+        name = f'./data/spectrum_reference.nc'
 
         if os.path.exists(name):
             return load(name) # type: FrequencySpectrum
@@ -69,7 +69,7 @@ def get_spectrum(kind) -> FrequencySpectrum:
     elif kind == 'target':
         kwargs = {'window':get_window('hann', 2048),'spectral_window':numpy.ones(9),
                   'segment_length_seconds':3600, 'use_u':True,'use_v':True}
-        name = f'./data/spectrum_smoothed.nc'
+        name = f'./data/spectrum_target.nc'
 
         if os.path.exists(name):
             return load(name) # type: FrequencySpectrum
@@ -90,8 +90,8 @@ def get_spectrum(kind) -> FrequencySpectrum:
             return load(name)  # type: FrequencySpectrum
 
         else:
-            native = get_spectrum('native')
-            hr = get_spectrum('smoothed')
+            native = get_spectrum('reference')
+            hr = get_spectrum('target')
             spec = native.interpolate_frequency(hr.frequency, method='spline')
             save(spec, name)
             return spec
@@ -103,8 +103,8 @@ def get_spectrum(kind) -> FrequencySpectrum:
             return load(name)  # type: FrequencySpectrum
 
         else:
-            native = get_spectrum('native')
-            hr = get_spectrum('smoothed')
+            native = get_spectrum('reference')
+            hr = get_spectrum('target')
             spec = native.interpolate_frequency(hr.frequency, method='spline', monotone_interpolation=False)
             save(spec, name)
             return spec
@@ -133,7 +133,7 @@ def get_peak_period(kind) -> DataArray:
         if os.path.exists(name):
             return load(name)  # type: DataArray
         else:
-            spec = get_spectrum('native')
+            spec = get_spectrum('reference')
             tp = spec.peak_period(use_spline=True)
             save(tp, name)
             return tp
@@ -144,7 +144,7 @@ def get_peak_period(kind) -> DataArray:
         if os.path.exists(name):
             return load(name)  # type: DataArray
         else:
-            spec = get_spectrum('native')
+            spec = get_spectrum('reference')
             tp = spec.peak_period(use_spline=True, monotone_interpolation=False)
             save(tp, name)
             return tp
