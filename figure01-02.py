@@ -2,7 +2,6 @@ from roguewave import FrequencySpectrum
 from roguewave.wavespectra.parametric import create_parametric_frequency_spectrum
 import matplotlib.pyplot as plt
 import numpy as np
-from roguewave import save, load
 import os
 
 frequency_step = 0.01
@@ -125,6 +124,7 @@ plot_example('pm', 0.1025, 0.1*frequency_step,ylab=False,text=r'(d) PM' + '\n' +
 
 plt.tight_layout()
 
+os.makedirs('./figures',exist_ok=True)
 figure.savefig('./figures/figure02.png')
 
 plt.show()

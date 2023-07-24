@@ -126,6 +126,7 @@ plot( 'pm', range(0,1 ), True,plot_legend=False,xlabel='$f_{{peak}}$ [Hz]' )
 plt.ylim([-1.5,1.5])
 
 plt.tight_layout()
+os.makedirs('./figures',exist_ok=True)
 figure.savefig('./figures/figure03.png')
 
 plt.show()
