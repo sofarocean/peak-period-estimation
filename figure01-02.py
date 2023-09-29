@@ -15,7 +15,6 @@ Authors: Pieter Bart Smit
 
 from roguewavespectrum import FrequencySpectrum
 from roguewavespectrum.parametric import create_parametric_frequency_spectrum
-#from roguewave.wavespectra.parametric import create_parametric_frequency_spectrum
 import matplotlib.pyplot as plt
 import numpy as np
 import os

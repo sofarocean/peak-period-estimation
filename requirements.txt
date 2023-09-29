@@ -1,3 +1,2 @@
-roguewave[full]==0.2.15
-qpsolvers
-cvxopt
+roguewavespectrum[full]==0.0.1
+matplotlib

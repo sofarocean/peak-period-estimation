@@ -1,0 +1,25 @@
+This repository contains the code to regenerate the figures in the paper:
+
+    "Continuous peak-period estimates from discrete surface-wave spectra",
+
+By
+
+    Smit, Pieter B., Egan, Galen, Houghton, Isabel A. 2023
+
+Abstract:
+
+    Peak periods estimated from finite resolution frequency spectra are necessarily discrete.
+    For wind generated surface gravity waves, conflicting considerations of robust (quasi)-stationary statistics,
+    and high spectral resolution, combined with the inverse relation between frequency and period, this typically
+    implies that swell periods (above 10 s) are resolved at best at O (1) s intervals. Here we consider a method to
+    improve peak period estimates for finite resolution spectra. Specifically, we propose to define the peak period
+    based on continuous spectra derived from a spline-based interpolation of the discretely sampled monotone cumulative
+    distribution function.
+
+A pre-print of the paper may be found at:
+
+    http://dx.doi.org/10.13140/RG.2.2.36359.98724
+
+To reproduce the figures simply run the corresponding scripts. The figures will be generated in the `./figures' folder.
+The data folder contains the raw data needed to reproduce the figures. The algorithms to produce peak periods are
+implemented in the `roguewavespectrum` package. For details on methodology we refer to the paper.
