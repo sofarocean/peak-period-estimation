@@ -13,19 +13,13 @@ Sofar Ocean Technologies
 
 Authors: Pieter Bart Smit
 """
-
-
-from roguewave import (
-    FrequencySpectrum,
-    load,
-    save
-)
-from roguewave.spotter import spectra_from_raw_gps
+from roguewavespectrum import FrequencySpectrum
 from scipy.signal.windows import get_window
 import xarray
 import os
 import numpy
 from xarray import DataArray
+import pickle
 
 def get_data():
     kinds = ['reference','target','monotone','natural']
@@ -53,60 +47,47 @@ def get_spectrum(kind) -> FrequencySpectrum:
         kwargs = {'segment_length_seconds': 3600, 'use_u':True,'use_v':True}
         name = f'./data/spectrum_reference.nc'
 
-        if os.path.exists(name):
-            return load(name) # type: FrequencySpectrum
-        else:
-            displacement_doppler = get_displacements()
-            spectrum = \
-                spectra_from_raw_gps(
-                    None,
-                    displacement_doppler=displacement_doppler,
-                    **kwargs,
-                )
-            save(spectrum,name)
-            return spectrum
+
+        return FrequencySpectrum.from_netcdf(name) # type: FrequencySpectrum
+
 
     elif kind == 'target':
         kwargs = {'window':get_window('hann', 2048),'spectral_window':numpy.ones(9),
                   'segment_length_seconds':3600, 'use_u':True,'use_v':True}
         name = f'./data/spectrum_target.nc'
 
-        if os.path.exists(name):
-            return load(name) # type: FrequencySpectrum
-        else:
-            displacement_doppler = get_displacements()
-            spectrum = \
-                spectra_from_raw_gps(
-                    None,
-                    displacement_doppler=displacement_doppler,
-                    **kwargs,
-                )
-            save(spectrum,name)
-            return spectrum
+        return FrequencySpectrum.from_netcdf(name)
     elif kind == 'monotone':
         name = './data/spectrum_monotone.nc'
 
         if os.path.exists(name):
-            return load(name)  # type: FrequencySpectrum
+            with open(name, "rb") as file_handle:
+                spec = pickle.load(file_handle)
+            return spec
 
         else:
             native = get_spectrum('reference')
             hr = get_spectrum('target')
             spec = native.interpolate_frequency(hr.frequency, method='spline')
-            save(spec, name)
+            with open(name, "wb") as file_handle:
+                pickle.dump(spec, file_handle)
             return spec
 
     elif kind == 'natural':
         name = './data/spectrum_natural.nc'
 
         if os.path.exists(name):
-            return load(name)  # type: FrequencySpectrum
+            if os.path.exists(name):
+                with open(name, "rb") as file_handle:
+                    spec = pickle.load(file_handle)
+                return spec
 
         else:
             native = get_spectrum('reference')
             hr = get_spectrum('target')
             spec = native.interpolate_frequency(hr.frequency, method='spline', monotone_interpolation=False)
-            save(spec, name)
+            with open(name, "wb") as file_handle:
+                pickle.dump(spec, file_handle)
             return spec
 
     else:
@@ -131,22 +112,28 @@ def get_peak_period(kind) -> DataArray:
         name = './data/tp_monotone.nc'
 
         if os.path.exists(name):
-            return load(name)  # type: DataArray
+            with open(name, "rb") as file_handle:
+                tp = pickle.load(file_handle)
+            return tp(name)  # type: DataArray
         else:
             spec = get_spectrum('reference')
             tp = spec.peak_period(use_spline=True)
-            save(tp, name)
+            with open(name, "wb") as file_handle:
+                pickle.dump(tp, file_handle)
             return tp
 
     elif kind == 'natural':
         name = './data/tp_natural.nc'
 
         if os.path.exists(name):
-            return load(name)  # type: DataArray
+            with open(name, "rb") as file_handle:
+                tp = pickle.load(file_handle)
+            return tp(name)  # type: DataArray
         else:
             spec = get_spectrum('reference')
             tp = spec.peak_period(use_spline=True, monotone_interpolation=False)
-            save(tp, name)
+            with open(name, "wb") as file_handle:
+                pickle.dump(tp, file_handle)
             return tp
     else:
         raise Exception(f'unknown kind {kind}')

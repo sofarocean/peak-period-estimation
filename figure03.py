@@ -13,11 +13,11 @@ Sofar Ocean Technologies
 Authors: Pieter Bart Smit
 """
 
-from roguewave.wavespectra.parametric import create_parametric_frequency_spectrum
+from roguewavespectrum.parametric import create_parametric_frequency_spectrum
 import matplotlib.pyplot as plt
 import numpy as np
-from roguewave import save, load
 import os
+import pickle
 
 # --- Plotting functions ---
 def get_periods(peak_periods, standard_deviations, kind='gaussian'):
@@ -37,7 +37,7 @@ def get_periods(peak_periods, standard_deviations, kind='gaussian'):
         for ind_per, period in enumerate(peak_periods):
             true_spectrum = create_parametric_frequency_spectrum(interpolated_frequencies, period, 1, kind,
                                                                  standard_deviation_hertz=standard_deviation)
-            downsampled_spectrum = true_spectrum.down_sample(sampled_frequencies)
+            downsampled_spectrum = true_spectrum.downsample(sampled_frequencies)
 
             truth[ind_sd, ind_per] = true_spectrum.peak_period().values
             downsampled[ind_sd, ind_per] = downsampled_spectrum.peak_period().values
@@ -90,14 +90,18 @@ def plot( periods, data, kind, _range, diff,xlabel=None,ylabel=None,plot_legend=
 def get_data(peak_frequency, frequency_width):
     # Running is somewhat slow - so we save locally the results after the first time.
     if os.path.exists('data/data.zip'):
-        data = load('data/data.zip')
+        with open("data/data.pkl", "rb") as file_handle:
+            data = pickle.loads(file_handle)
     else:
         # Lets calculate
         data = {}
         data['gaussian'] = get_periods(peak_frequency, frequency_width, kind='gaussian')
         data['jonswap'] = get_periods(peak_frequency, [0.0], kind='jonswap')
         data['pm'] = get_periods(peak_frequency, [0.0], kind='pm')
-        save(data, 'data/data.zip')
+
+        with open("data/data.pkl", "wb") as file_handle:
+            pickle.dump(data, file_handle)
+
 
     return data
 

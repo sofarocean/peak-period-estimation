@@ -13,8 +13,9 @@ Sofar Ocean Technologies
 Authors: Pieter Bart Smit
 """
 
-from roguewave import FrequencySpectrum
-from roguewave.wavespectra.parametric import create_parametric_frequency_spectrum
+from roguewavespectrum import FrequencySpectrum
+from roguewavespectrum.parametric import create_parametric_frequency_spectrum
+#from roguewave.wavespectra.parametric import create_parametric_frequency_spectrum
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -30,7 +31,7 @@ def get_spectra(peak_frequency, standard_deviation, kind='gaussian'):
     """
     true_spectrum = create_parametric_frequency_spectrum(interpolated_frequencies, peak_frequency, 1, kind,
                                                          standard_deviation_hertz=standard_deviation)
-    downsampled_spectrum = true_spectrum.down_sample(sampled_frequencies)
+    downsampled_spectrum = true_spectrum.downsample(sampled_frequencies)
     interpolated_spectrum = downsampled_spectrum.interpolate_frequency(interpolated_frequencies, method='spline')
     non_monotone = downsampled_spectrum.interpolate_frequency(interpolated_frequencies, method='spline',
                                                               monotone_interpolation=False)
